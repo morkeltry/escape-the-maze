@@ -35,12 +35,16 @@ const random = index => {
 
 const contents = populateSquares([],gridWidth,gridHeight,random);
 
-const doRotate = square => {
-  contents[lookup[square.id]].direction = (contents[lookup[square.id]].direction+90)%360;
+const doRotate = index => {
+  contents[lookup[index]].direction = (contents[lookup[index]].direction+90)%360;
 }
 
+const rotateUpdate = square => {
+  doRotate(square.id);
+  doUpdate();
+}
 const follow = index => {
-  doRotate ({ id : index });
+  doRotate ({id : index});
   let [x,y] = index.split(',');
   [x,y] = [x*1,y*1];
   switch (contents[lookup[index]].direction) {
@@ -55,6 +59,7 @@ const follow = index => {
     contents[lookup[index]].hasPlayer = false;
     contents[lookup[newIndex]].hasPlayer = true;
   }
+  doUpdate();
   return newIndex;
 }
 
@@ -82,39 +87,49 @@ const doClick = d => {
 }
 
 
-const maze = d3.select ('#maze');
-const squares = maze.selectAll ('.square');
+const doUpdate = () => {
+  const maze = d3.select ('#maze');
+  const squares = maze.selectAll ('.square');
+console.log('Running update');
+  maze
+      .attr ('width',(gridWidth+1)*pixelWidth)
+      .attr ('height',(gridHeight+1)*pixelHeight)
 
-maze
-    .attr ('width',(gridWidth+1)*pixelWidth)
-    .attr ('height',(gridHeight+1)*pixelHeight)
+  let signs= squares.
+    data (contents)
+        .enter ()
+        .append ('svg:g')
 
-let signs= squares.
-  data (contents)
-      .enter ()
-      .append ('svg:g')
-
-signs
-  .classed ('square',true)
-  .attr ('id', d=> d.id)
-  .attr ('fill', canBeReached)
-  .attr ('stroke', strokeColour)
-  .attr ('stroke-width', 1)
-  .on ('click', doRotate)
-
-signs
-    .append ('circle')
-      .attr ('cx', d => d.xPos)
-      .attr ('cy',d => d. yPos)
-      .attr ('r', pixelRadius)
-      .attr ('stroke-width', 1)
-signs
-    .append ('path')
-      .attr ('stroke', 'white')
-      .attr ('stroke-width', pixelWidth/10)
-      .attr ('stroke-linejoin', 'miter')
-      .attr ('d', arrowUpPath)
+  signs
+    .classed ('square',true)
+    .attr ('id', d=> d.id)
+    .attr ('fill', canBeReached)
+    .attr ('stroke', strokeColour)
+    .attr ('stroke-width', 1)
       .attr ('transform', d=>
-        'translate ('+d.xPos+','+d.yPos+')' +
+        `translate (${d.xPos},${d.yPos}) ` +
         `scale( ${pixelWidth/100}, ${pixelHeight/100}) ` +
-        `rotate(${d.direction})`)
+        `rotate(${d.direction})` )
+    .on ('click', rotateUpdate)
+
+  signs
+      .append ('circle')
+        .attr ('r', 45)             // r=45 => height=90 = 90% of 100px basis
+        .attr ('stroke-width', 1)
+  signs
+      .append ('path')
+        .attr ('stroke', 'white')
+        .attr ('stroke-width', pixelWidth/10)
+        .attr ('stroke-linejoin', 'miter')
+        .attr ('d', arrowUpPath)
+  signs
+      .merge (squares)
+      .attr ('fill', canBeReached)
+      .attr ('stroke', strokeColour)
+      .attr ('transform', d=>
+        `translate (${d.xPos},${d.yPos}) ` +
+        `scale( ${pixelWidth/100}, ${pixelHeight/100}) ` +
+        `rotate(${d.direction})` )
+}
+
+doUpdate();
