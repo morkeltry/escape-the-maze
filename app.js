@@ -56,25 +56,18 @@ const follow = index => {
   index = index || `${Math.floor(Math.random()*gridWidth)},${Math.floor(Math.random()*gridHeight)}`
   console.log (`follow ${index} ${contents[lookup[index]] && contents[lookup[index]].direction}`);
   exitDirection = contents[lookup[index]].direction;
-  if (lookup[index] == undefined) {
-    console.log('should never reach here');
-    youWin();
-    newIndex = index;
-  }
-  else {
-    doRotate (index);
-    let [x,y] = index.split(',');
-    [x,y] = [x*1,y*1];
-    switch (exitDirection) {
-      case 0 : {y--; break;}
-      case 90 : {x++; break;}
-      case 180 : {y++; break;}
-      case 270 : {x--; break;}
-      default: break;
-    };
-    newIndex = x +','+ y;
+  let [x,y] = index.split(',');
+  [x,y] = [x*1,y*1];
+  switch (exitDirection) {
+    case 0 : {y--; break;}
+    case 90 : {x++; break;}
+    case 180 : {y++; break;}
+    case 270 : {x--; break;}
+    default: break;
   };
+  newIndex = x +','+ y;
   if (lookup[newIndex]>=0) {
+    doRotate (index);
     contents[lookup[index]].hasPlayer = false;
     contents[lookup[newIndex]].hasPlayer = true;
     contents[lookup[index]].exited.push (exitDirection);
@@ -151,7 +144,7 @@ console.log('Running update');
 
 const setPlayer = d => {
   console.log(d);
-  if (current)
+  if (current && lookup[current] != undefined)
     contents[lookup[current]].hasPlayer = false;
   current = d.id;
   if (lookup[current] != undefined) {
