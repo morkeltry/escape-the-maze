@@ -13,6 +13,7 @@ const history = [];
 var contents;
 var placePlayer = true;
 var paused = false;
+var hasWon = false;
 var current = null;
 
 const populateSquares = (startArr,x,yInit,pattern) => {
@@ -70,6 +71,7 @@ const follow = index => {
     doRotate (index);
     contents[lookup[index]].hasPlayer = false;
     contents[lookup[newIndex]].hasPlayer = true;
+    contents[lookup[index]].visited = true;
     contents[lookup[index]].exited.push (exitDirection);
   } else {
     youWin();
@@ -79,10 +81,18 @@ const follow = index => {
   return newIndex;
 }
 
+const lighten = rgbStr => {
+  console.log(rgbStr);
+  const regex = new RegExp ('[0-9]{1,3}','gi');
+  const whiteAverage = x =>
+    255-(255-x)/2;
+  let [r,g,b] = rgbStr.match(regex);
+  return `rgb(${whiteAverage(r)},${whiteAverage(g)},${whiteAverage(b)})`
+}
 
 const canBeReached = d => {
   if (d.hasPlayer)
-    return ('magenta');
+    return ('rgb(255,0,255)');
   let [x,y] = d.id.split(',');
   [x,y] = [x*1,y*1];
   surroundingIndices = [[-1,0,90],[0,-1,180],[1,0,270],[0,1,0]].map (xY =>
@@ -93,27 +103,52 @@ const canBeReached = d => {
   return surroundingIndices.some (el =>
     lookup[el.index]>=0 && el.direction === contents[lookup[el.index]].direction
   )
-  ? ('green')
-    : ('lightgreen');
+  ? ('rgb(0,128,0)')
+    : ('rgb(144,238,144)');
 };
+
+const favouriteSquares = d => {
+  if (!d.visited ||1) {
+    return lighten(canBeReached(d));
+
+  }
+
+
+
+}
 
 const doUpdate = () => {
   const maze = d3.select ('#maze');
   const squares = maze.selectAll ('.square');
+  var signs;
+  var fillFunc;
+
 console.log('Running update');
   maze
       .attr ('width',(gridWidth+1)*pixelWidth)
       .attr ('height',(gridHeight+1)*pixelHeight)
 
-  let signs= squares.
-    data (contents)
-        .enter ()
-        .append ('svg:g')
+  if (!hasWon) {
+    fillFunc = canBeReached;
+    signs= squares.
+      data (contents)
+          .enter ()
+          .append ('svg:g')
+  }
+
+  if (hasWon) {
+    fillFunc = favouriteSquares;
+    signs= squares.
+      data (contents)
+          .enter ()
+          .append ('svg:g')
+  }
+
 
   signs
     .classed ('square',true)
     .attr ('id', d=> d.id)
-    .attr ('fill', canBeReached)
+    .attr ('fill', fillFunc)
     .attr ('stroke', strokeColour)
     .attr ('stroke-width', 1)
       .attr ('transform', d=>
@@ -134,7 +169,7 @@ console.log('Running update');
         .attr ('d', arrowUpPath)
   signs
       .merge (squares)
-      .attr ('fill', canBeReached)
+      .attr ('fill', fillFunc)
       .attr ('stroke', strokeColour)
       .attr ('transform', d=>
         `translate (${d.xPos},${d.yPos}) ` +
@@ -156,9 +191,7 @@ const setPlayer = d => {
 }
 
 const startWalk = () => {
-  console.log('got walk');
   setTimeout (()=>{
-    console.log('walking');
   if (!paused)
       setPlayer ({id: follow(current)});
   if (!paused) {
@@ -170,8 +203,8 @@ const startWalk = () => {
 
 const youWin = () => {
   paused = true;
-  console.log('WON!!!')
-
+  hasWon= true;
+  console.log('WON!!!');
 }
 
 d3.select ('#set-player')
