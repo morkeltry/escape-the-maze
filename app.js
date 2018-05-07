@@ -8,7 +8,10 @@ const strokeColour =  d => 'lightgrey';
 const arrowUpPath = 'M-15,-5 L0,-25 L15,-5 M0,-25 L0,30';
 
 const lookup = {};
-const current = '4,1';
+var contents;
+var placePlayer = true;
+var paused = false;
+var current = null;
 
 const populateSquares = (startArr,x,yInit,pattern) => {
   let count=0;
@@ -33,7 +36,7 @@ const random = index => {
   return 90 * Math.floor (Math.random()*4);
 }
 
-const contents = populateSquares([],gridWidth,gridHeight,random);
+contents = populateSquares([],gridWidth,gridHeight,random);
 
 const doRotate = index => {
   contents[lookup[index]].direction = (contents[lookup[index]].direction+90)%360;
@@ -110,7 +113,7 @@ console.log('Running update');
         `translate (${d.xPos},${d.yPos}) ` +
         `scale( ${pixelWidth/100}, ${pixelHeight/100}) ` +
         `rotate(${d.direction})` )
-    .on ('click', rotateUpdate)
+    .on ('click', d => placePlayer ? setPlayer(d) : rotateUpdate(d))
 
   signs
       .append ('circle')
@@ -131,5 +134,39 @@ console.log('Running update');
         `scale( ${pixelWidth/100}, ${pixelHeight/100}) ` +
         `rotate(${d.direction})` )
 }
+
+const setPlayer = d => {
+  console.log(d);
+  console.log(placePlayer);
+  if (current)
+    contents[lookup[current]].hasPlayer = false;
+  current = d.id;
+  contents[lookup[current]].hasPlayer = true;
+  placePlayer = false;
+  doUpdate();
+}
+
+const startWalk = () => {
+
+}
+
+d3.select ('#set-player')
+  .on ('click', ()=> {
+    placePlayer = true;
+  });
+
+d3.select ('#reset')
+  .on ('click', ()=> {
+    contents = populateSquares([],gridWidth,gridHeight,random);
+    doUpdate();
+  });
+
+d3.select ('#pause')
+  .on ('click', ()=> {
+    paused = !paused;
+  });
+
+d3.select ('#go')
+  .on ('click', startWalk);
 
 doUpdate();
