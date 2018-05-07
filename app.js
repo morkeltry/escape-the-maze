@@ -9,6 +9,7 @@ const arrowUpPath = 'M-15,-5 L0,-25 L15,-5 M0,-25 L0,30';
 const walkSpeed = 350;
 
 const lookup = {};
+const history = [];
 var contents;
 var placePlayer = true;
 var paused = false;
@@ -25,7 +26,9 @@ const populateSquares = (startArr,x,yInit,pattern) => {
         xPos : (x+0.5)*pixelWidth,
         yPos : (y+0.5)*pixelHeight,
         direction : pattern(index),
-        hasPlayer : (index===current)
+        hasPlayer : (index===current),
+        visited : false,
+        exited : []
       });
       lookup[index] = count;
       count++;
@@ -37,8 +40,6 @@ const random = index => {
   return 90 * Math.floor (Math.random()*4);
 }
 
-contents = populateSquares([],gridWidth,gridHeight,random);
-
 const doRotate = index => {
   contents[lookup[index]].direction = (contents[lookup[index]].direction+90)%360;
 }
@@ -46,27 +47,42 @@ const doRotate = index => {
 const rotateUpdate = square => {
   doRotate(square.id);
   doUpdate();
-}
+};
+
 const follow = index => {
-  if (!current)
-    index= `${Math.floor(Math.random()*gridWidth)},${Math.floor(Math.random()*gridHeight)}`
-  console.log(contents[lookup[index]]);
-  doRotate (index);
-  let [x,y] = index.split(',');
-  [x,y] = [x*1,y*1];
-  switch (contents[lookup[index]].direction) {
-    case 0 : {y--; break;}
-    case 90 : {x++; break;}
-    case 180 : {y++; break;}
-    case 270 : {x--; break;}
-    default: break;
+  var exitDirection;
+  var newIndex;
+
+  index = index || `${Math.floor(Math.random()*gridWidth)},${Math.floor(Math.random()*gridHeight)}`
+  console.log (`follow ${index} ${contents[lookup[index]] && contents[lookup[index]].direction}`);
+  exitDirection = contents[lookup[index]].direction;
+  if (lookup[index] == undefined) {
+    console.log('should never reach here');
+    youWin();
+    newIndex = index;
+  }
+  else {
+    doRotate (index);
+    let [x,y] = index.split(',');
+    [x,y] = [x*1,y*1];
+    switch (exitDirection) {
+      case 0 : {y--; break;}
+      case 90 : {x++; break;}
+      case 180 : {y++; break;}
+      case 270 : {x--; break;}
+      default: break;
+    };
+    newIndex = x +','+ y;
   };
-  let newIndex = x +','+ y;
   if (lookup[newIndex]>=0) {
     contents[lookup[index]].hasPlayer = false;
     contents[lookup[newIndex]].hasPlayer = true;
+    contents[lookup[index]].exited.push (exitDirection);
+  } else {
+    youWin();
   }
   doUpdate();
+  console.log('follow returning');
   return newIndex;
 }
 
@@ -135,25 +151,34 @@ console.log('Running update');
 
 const setPlayer = d => {
   console.log(d);
-  console.log(placePlayer);
   if (current)
     contents[lookup[current]].hasPlayer = false;
   current = d.id;
-  contents[lookup[current]].hasPlayer = true;
-  placePlayer = false;
-  doUpdate();
+  if (lookup[current] != undefined) {
+    contents[lookup[current]].hasPlayer = true;
+    history.push (current);
+    placePlayer = false;
+    doUpdate();
+  }
 }
 
 const startWalk = () => {
   console.log('got walk');
   setTimeout (()=>{
-  if (!paused) {
     console.log('walking');
+  if (!paused)
       setPlayer ({id: follow(current)});
+  if (!paused) {
       doUpdate();
       startWalk();
   }},
    walkSpeed);
+}
+
+const youWin = () => {
+  paused = true;
+  console.log('WON!!!')
+
 }
 
 d3.select ('#set-player')
@@ -177,4 +202,5 @@ d3.select ('#pause')
 d3.select ('#go')
   .on ('click', startWalk);
 
+contents = populateSquares([],gridWidth,gridHeight,random);
 doUpdate();
