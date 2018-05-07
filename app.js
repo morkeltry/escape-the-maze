@@ -6,6 +6,7 @@ const pixelRadius = 35;
 const fillColour = d => 'pink';
 const strokeColour =  d => 'lightgrey';
 const arrowUpPath = 'M-15,-5 L0,-25 L15,-5 M0,-25 L0,30';
+const walkSpeed = 350;
 
 const lookup = {};
 var contents;
@@ -47,7 +48,10 @@ const rotateUpdate = square => {
   doUpdate();
 }
 const follow = index => {
-  doRotate ({id : index});
+  if (!current)
+    index= `${Math.floor(Math.random()*gridWidth)},${Math.floor(Math.random()*gridHeight)}`
+  console.log(contents[lookup[index]]);
+  doRotate (index);
   let [x,y] = index.split(',');
   [x,y] = [x*1,y*1];
   switch (contents[lookup[index]].direction) {
@@ -83,12 +87,6 @@ const canBeReached = d => {
   ? ('green')
     : ('lightgreen');
 };
-
-
-const doClick = d => {
-  console.log ('HI');
-}
-
 
 const doUpdate = () => {
   const maze = d3.select ('#maze');
@@ -147,7 +145,15 @@ const setPlayer = d => {
 }
 
 const startWalk = () => {
-
+  console.log('got walk');
+  setTimeout (()=>{
+  if (!paused) {
+    console.log('walking');
+      setPlayer ({id: follow(current)});
+      doUpdate();
+      startWalk();
+  }},
+   walkSpeed);
 }
 
 d3.select ('#set-player')
@@ -164,6 +170,8 @@ d3.select ('#reset')
 d3.select ('#pause')
   .on ('click', ()=> {
     paused = !paused;
+    console.log('paused:',paused);
+    startWalk();
   });
 
 d3.select ('#go')
