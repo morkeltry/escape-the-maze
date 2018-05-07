@@ -55,7 +55,7 @@ const follow = index => {
   var newIndex;
 
   index = index || `${Math.floor(Math.random()*gridWidth)},${Math.floor(Math.random()*gridHeight)}`
-  console.log (`follow ${index} ${contents[lookup[index]] && contents[lookup[index]].direction}`);
+  // console.log (`follow ${index} ${contents[lookup[index]] && contents[lookup[index]].direction}`);
   exitDirection = contents[lookup[index]].direction;
   let [x,y] = index.split(',');
   [x,y] = [x*1,y*1];
@@ -77,12 +77,10 @@ const follow = index => {
     youWin();
   }
   doUpdate();
-  console.log('follow returning');
   return newIndex;
 }
 
 const lighten = rgbStr => {
-  console.log(rgbStr);
   const regex = new RegExp ('[0-9]{1,3}','gi');
   const whiteAverage = x =>
     255-(255-x)/3;
@@ -178,7 +176,6 @@ console.log('Running update');
 }
 
 const setPlayer = d => {
-  console.log(d);
   if (current && lookup[current] != undefined)
     contents[lookup[current]].hasPlayer = false;
   current = d.id;
@@ -221,7 +218,6 @@ d3.select ('#reset')
 d3.select ('#pause')
   .on ('click', ()=> {
     paused = !paused;
-    console.log('paused:',paused);
     startWalk();
   });
 
