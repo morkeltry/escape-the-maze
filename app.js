@@ -85,7 +85,7 @@ const lighten = rgbStr => {
   console.log(rgbStr);
   const regex = new RegExp ('[0-9]{1,3}','gi');
   const whiteAverage = x =>
-    255-(255-x)/2;
+    255-(255-x)/3;
   let [r,g,b] = rgbStr.match(regex);
   return `rgb(${whiteAverage(r)},${whiteAverage(g)},${whiteAverage(b)})`
 }
