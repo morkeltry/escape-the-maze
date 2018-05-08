@@ -8,6 +8,7 @@ const strokeColour =  d => 'lightgrey';
 
 const arrowUpPath = 'M-15,-5 L0,-25 L15,-5 M0,-25 L0,30';
 const walkSpeed = 350;
+const revertDirectionAfterWin = true;
 
 const lookup = {};
 const history = [];
@@ -112,7 +113,13 @@ const favouriteSquares = d => {
     return lighten(canBeReached(d));
   }
   return (scaleColour (d.exited.length));
+}
 
+const revertDirections = () => {
+  contents.forEach (square => {
+    if (square.exited.length)
+      square.direction = square.exited[0];
+  });
 }
 
 const doUpdate = () => {
@@ -139,6 +146,9 @@ console.log('Running update');
     scaleColour
       .domain (d3.extent (contents, d=> d.exited.length))
       .range (['rgb(255,0,255)','rgb(0,0,128)']);
+
+    if (revertDirectionAfterWin)
+      revertDirections();
     signs= squares.
       data (contents)
           .enter ()
