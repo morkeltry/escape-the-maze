@@ -1,0 +1,22 @@
+body {
+}
+
+.gameboard {
+  display: block;
+  margin: auto;
+  padding-bottom : 2.5vh;
+  height : 750px;
+  width : 100%;
+}
+
+.flex-container {
+  display : flex;
+  width : 100%;
+  justify-content: space-around;
+}
+
+.buttons {
+  height: 5vh;
+  width: 750px;
+  background-color : teal;
+}

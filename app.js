@@ -145,7 +145,7 @@ console.log('Running update');
     fillFunc = favouriteSquares;
     scaleColour
       .domain (d3.extent (contents, d=> d.exited.length))
-      .range (['rgb(255,0,255)','rgb(0,0,128)']);
+      .range (['rgb(223,0,223)','rgb(0,0,128)']);
 
     if (revertDirectionAfterWin)
       revertDirections();
