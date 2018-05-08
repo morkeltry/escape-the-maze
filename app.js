@@ -5,11 +5,13 @@ const pixelHeight = 75;
 const pixelRadius = 35;
 const fillColour = d => 'pink';
 const strokeColour =  d => 'lightgrey';
+
 const arrowUpPath = 'M-15,-5 L0,-25 L15,-5 M0,-25 L0,30';
 const walkSpeed = 350;
 
 const lookup = {};
 const history = [];
+var scaleColour = d3.scaleLinear();
 var contents;
 var placePlayer = true;
 var paused = false;
@@ -106,12 +108,10 @@ const canBeReached = d => {
 };
 
 const favouriteSquares = d => {
-  if (!d.visited ||1) {
+  if (!d.visited) {
     return lighten(canBeReached(d));
-
   }
-
-
+  return (scaleColour (d.exited.length));
 
 }
 
@@ -136,6 +136,9 @@ console.log('Running update');
 
   if (hasWon) {
     fillFunc = favouriteSquares;
+    scaleColour
+      .domain (d3.extent (contents, d=> d.exited.length))
+      .range (['rgb(255,0,255)','rgb(0,0,128)']);
     signs= squares.
       data (contents)
           .enter ()
