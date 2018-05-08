@@ -86,7 +86,7 @@ const follow = index => {
 const lighten = rgbStr => {
   const regex = new RegExp ('[0-9]{1,3}','gi');
   const whiteAverage = x =>
-    255-(255-x)/3;
+    Math.floor(255-(255-x)/3);
   let [r,g,b] = rgbStr.match(regex);
   return `rgb(${whiteAverage(r)},${whiteAverage(g)},${whiteAverage(b)})`
 }
@@ -145,7 +145,7 @@ console.log('Running update');
     fillFunc = favouriteSquares;
     scaleColour
       .domain (d3.extent (contents, d=> d.exited.length))
-      .range (['rgb(223,0,223)','rgb(0,0,128)']);
+      .range (['rgb(255,0,255)','rgb(0,0,128)']);
 
     if (revertDirectionAfterWin)
       revertDirections();
