@@ -17,3 +17,6 @@ You can set arrows up before starting walking to make it harder for the player.
 The harder it is for the player, the more pretty colours d3 displays at the end using its colour scaling :)
 
 
+
+escape-the-maze was written in a day and if I'd have taken longer, the next things to work on would be styling (mmm.. d3 animation) and a more intuitive interface...
+
